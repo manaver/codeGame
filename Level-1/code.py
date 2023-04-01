@@ -13,21 +13,27 @@
 
 from collections import namedtuple
 
+import decimal
+
+# Set the precision of decimal numbers to 50 digits
+decimal.getcontext().prec = 50
+
 Order = namedtuple('Order', 'id, items')
 Item = namedtuple('Item', 'type, description, amount, quantity')
 
+
 def validorder(order: Order):
     net = 0
-    
+
     for item in order.items:
         if item.type == 'payment':
-            net += item.amount
+            net += decimal.Decimal(item.amount)
         elif item.type == 'product':
-            net -= item.amount * item.quantity
+            net -= decimal.Decimal(item.amount) * decimal.Decimal(item.quantity)
         else:
-            return("Invalid item type: %s" % item.type)
-    
+            return ("Invalid item type: %s" % item.type)
+
     if net != 0:
-        return("Order ID: %s - Payment imbalance: $%0.2f" % (order.id, net))
+        return ("Order ID: %s - Payment imbalance: $%0.2f" % (order.id, net))
     else:
-        return("Order ID: %s - Full payment received!" % order.id)
+        return ("Order ID: %s - Full payment received!" % order.id)
