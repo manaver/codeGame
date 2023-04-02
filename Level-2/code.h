@@ -46,11 +46,12 @@ bool update_setting(user_account* ua, const char *index, const char *value) {
     i = strtol(index, &endptr, 10);
     if (*endptr)
         return false;
-    if (i >= SETTINGS_COUNT)
+    if (i >= SETTINGS_COUNT || i < 0) //Fix added no negative indexes
         return false;
     v = strtol(value, &endptr, 10);
     if (*endptr)
         return false;
+        
     ua->setting[i] = v;
     return true;
 }
