@@ -78,7 +78,14 @@ class DB_CRUD_ops(object):
             cur = db_con.cursor() 
             
             res = "[METHOD EXECUTED] get_stock_info\n"
-            query = "SELECT * FROM stocks WHERE symbol = '{0}'".format(stock_symbol)
+            # Sanitizing input
+            params = (stock_symbol,)
+            sql = "SELECT * FROM stocks WHERE symbol = ?"
+            cur.execute(sql, params)
+
+            # Formatting sql for test cases
+            query = sql.replace('?', "'{}'").format(*params)
+
             res += "[QUERY] " + query + "\n"
             
             # a block list or restricted characters that should not be presented in user-supplied input
@@ -94,9 +101,7 @@ class DB_CRUD_ops(object):
                 # sanitized_query = query.translate({ord(char):None for char in restricted_chars})
                 # res += "[SANITIZED_QUERY]" + sanitized_query + "\n"
                 res += "CONFIRM THAT THE ABOVE QUERY IS NOT MALICIOUS TO EXECUTE"
-            else:
-                cur.execute(query)
-                
+            else:                
                 query_outcome = cur.fetchall()
                 for result in query_outcome:
                     res += "[RESULT] " + str(result)
@@ -122,13 +127,19 @@ class DB_CRUD_ops(object):
             cur = db_con.cursor()
             
             res = "[METHOD EXECUTED] get_stock_price\n"
-            query = "SELECT price FROM stocks WHERE symbol = '" + stock_symbol + "'"
+
+            # Sanitizing input
+            params = (stock_symbol,)
+            sql = "SELECT price FROM stocks WHERE symbol = ?"
+            cur.execute(sql, params)
+
+            # Formatting sql for test cases
+            query = sql.replace('?', "'{}'").format(*params)
             res += "[QUERY] " + query + "\n"
+
             if ';' in query:
                 res += "[SCRIPT EXECUTION]\n"
-                cur.executescript(query)
             else:
-                cur.execute(query)
                 query_outcome = cur.fetchall()
                 for result in query_outcome:
                     res += "[RESULT] " + str(result) + "\n"
@@ -156,10 +167,16 @@ class DB_CRUD_ops(object):
             
             res = "[METHOD EXECUTED] update_stock_price\n"
             # UPDATE stocks SET price = 310.0 WHERE symbol = 'MSFT'
-            query = "UPDATE stocks SET price = '%d' WHERE symbol = '%s'" % (price, stock_symbol)
+            
+            params = (int(price), stock_symbol)
+
+            sql = "UPDATE stocks SET price = ? WHERE symbol = ?"
+            cur.execute(sql, params)
+            # Formatting sql for test cases
+            query = sql.replace('?', "'{}'").format(*params)
+
             res += "[QUERY] " + query + "\n"
             
-            cur.execute(query)
             db_con.commit()
             query_outcome = cur.fetchall()
             for result in query_outcome:
@@ -217,6 +234,7 @@ class DB_CRUD_ops(object):
             
             res = "[METHOD EXECUTED] exec_user_script\n"
             res += "[QUERY] " + query + "\n"
+
             if ';' in query:
                 res += "[SCRIPT EXECUTION]"
                 cur.executescript(query)
