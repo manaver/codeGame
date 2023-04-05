@@ -37,11 +37,16 @@ class MD5_hasher:
     
     # same as above but using a different algorithm to hash which is MD5
     def password_hash(self, password):
-        return hashlib.md5(password.encode()).hexdigest()
+        salt = secrets.token_hex(16)
+        salted_password = password + salt
+        hashed = hashlib.md5(salted_password.encode()).hexdigest()
+        return f"{hashed}${salt}"
 
     def password_verification(self, password, password_hash):
-        password = self.password_hash(password)
-        return secrets.compare_digest(password.encode(), password_hash.encode())    
+        hashed_password, salt = password_hash.split('$')
+        salted_password = password + salt
+        computed_hash = hashlib.md5(salted_password.encode()).hexdigest()
+        return secrets.compare_digest(computed_hash, hashed_password)   
 
 # a collection of sensitive secrets necessary for the software to operate
 PRIVATE_KEY = os.environ.get('PRIVATE_KEY')
