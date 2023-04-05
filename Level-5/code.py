@@ -17,9 +17,8 @@ class Random_generator:
 
     # generates salt
     def generate_salt(self, rounds=22):
-        first_phrase = ''.join(str(random.randint(0,9)) for i in range(rounds))
-        second_phase = '$2b$12$' + first_phrase
-        return second_phase.encode()
+        return bcrypt.gensalt() 
+
 
 class SHA256_hasher:
 
